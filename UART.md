@@ -9,7 +9,7 @@ To exit qemu crtl+A then x
 **DLAB(Divisor Latch Access Bit)**<br>
 **LSR(Line Status Register):** provides information to the CPU of status of data transfer.<br>
 **LSR_UART:** Line status register for uart. 14h offset(0x14) -> chapter 19.5.1.19 <br>
-**LCR(Line Control Register):** <br>
+**LCR(Line Control Register):** Configuring how UART should behave<br>
 **THRE(Transmit Holding Register Empty)**<br>
 **TEMT(Transmitter Empty)**<br>
 
@@ -25,7 +25,7 @@ Start and stop bit are temporarily adding data uart hardware. So eventhough it l
 
 If FIFO enabled, it can hold 16 frames (16-byte FIFO). 
 
-RBR, THR and DLL share one address. To acess these we need DLAB value. If DLAB = 0, THR/RBR if DLAB = 1, DLL
+RBR, THR and DLL share one address. To acess these we need DLAB value. If DLAB = 0 -> THR/RBR. If DLAB = 1 -> DLL(to set baud rate)
 
 
 If we want to write then address is base address + 0x00 (check this statement)
@@ -40,8 +40,10 @@ UART0   0x44E0_9000     0x44E0_9FFF     4KB     UART Registers
 
 **UART0 base address = 0x44E09000**
 
-0x44E0A000 - 0x44E09000 = 0x1000 bytes
+0x44E0A000 - 0x44E09000 = 0x1000 bytes<br>
 0x1000 = 4096 bytes(in decimal) = 4 KB
+
+![LSR](images/uart_registers.png)
 
 **LSR_UART** = UART0 base address + 0x14 = **0x44E09014**
 
@@ -92,12 +94,69 @@ Stop bit added
 TX wire
 ~~~
 
+### UART Initializing
+
+**Baud rate** (Table 19-25)
+
+Baud rate = Clock/(16 x Divisor)
+
+![LSR](images/baud_rate.png)
+
+Accoring to the table for 115200 baud rate DLH = 0x00 and DLL = 0x1A
+
+We need to configure the uart before using it. For that we need LCR. According to the table 19-29 (chapter 19.5.1)LCR offset is 0x0C.
+
+LCR = UART_BASE + offset
+    = 0x44E09000 + 0x0C
+    = 0x44E0900C
+
+![LSR](images/LCR.png)
+
+We need 8N1 conbination. This is the standard one.
+
+8 -> data bits
+N -> No parity (If enable, sends an extra bit for error checking)
+1 -> 1 stop bit
+
+so we need to consider 1-0(for char_length), 3(parity) and 2(NB_stop) bit right
+
+Bit      Field
+7        DLAB              1           
+3        Parity            0
+2        Stop bit          0
+0-1      Char length       3
+
+Note: Once the initialization done we have to update DLAB = 0 to send the data. Both mode uses same DLAB field in LCR register.
+
+For char length 2 bits were reserved(0 and 1). 
+
+~~~
+00       0        5 bits
+01       1        6 bits
+10       2        7 bits
+11       3        8 bits
+~~~
+
+Here is the final bit values
+
+~~~
+Bit:   7 6 5 4 3 2 1 0
+Value: 0 x x x 0 0 1 1
+
+In binary -> 00000011
+In hex -> 0x03
+~~~
+
+**LCR = 0x03**
+
 Reffer:
 
 Table 2-2 (page 180) -> Memory Map 
+
 4.5.5 -> UART Register
 
 ### Links
 
 Texas Instruments: https://www.ti.com/lit/ug/spruh73q/spruh73q.pdf?ts=1777214445506
 
+Osdev: https://wiki.osdev.org/Serial_Ports
