@@ -147,7 +147,17 @@ In binary -> 00000011
 In hex -> 0x03
 ~~~
 
-**LCR = 0x03**
+**LCR = 0x03** --> normal mode
+
+Init mode
+
+~~~
+Bit:   7 6 5 4 3 2 1 0
+Value: 1 x x x 0 0 1 1
+~~~
+
+**LCR = 0x83** --> init mode
+
 
 Reffer:
 
