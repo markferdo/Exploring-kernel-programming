@@ -30,8 +30,10 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "uart.h"
 
+// Refer UART registers chapter 19.5
 #define UART0_BASE 0x44E090000
 #define UART0_THR (UART0_BASE + 0x00)
+#define UART0_RHR (UART0_BASE + 0x00) // RHR/RBR
 #define UART0_DLL (UART0_BASE + 0x00) // when DLAB=1
 #define UART0_DLH (UART0_BASE + 0x04) // when DLAB=1
 #define UART0_LCR (UART0_BASE + 0x0C)
@@ -48,24 +50,37 @@ void uart_init(){
     // set baud rate (DLL/DLH)
     // normal mode LCR = 0x03
 
-    *(volatile uint32_t *)(UART0_BASE + 0x0C) = 0x83; // config mode DLAB = 1
+    *(volatile uint32_t *)(UART0_LCR) = 0x83; // config mode DLAB = 1
 
     // set baud rate to 115200. From the data sheet, the UART clock is 48MHz, the divisor would be 48MHz / (16 * 115200) = 26.04 ~ 26 (decimal) = 0x1A (hexadecimal)
     // 115.2 kbps   16x   26   0x00, 0x1A   115.38 kbps   +0.16% copied from Table 19-25 in texas instruments data sheet.
     // DLH 0x00, DLL 0x1A
-    *(volatile uint32_t *)(UART0_BASE + 0x00) = 0x1A; // set baud rate (DLL)
-    *(volatile uint32_t *)(UART0_BASE + 0x04) = 0x00; // set baud rate (DLH)
+    *(volatile uint32_t *)(UART0_DLL) = 0x1A; // set baud rate (DLL)
+    *(volatile uint32_t *)(UART0_DLH) = 0x00; // set baud rate (DLH)
 
 
-    *(volatile uint32_t *)(UART0_BASE + 0x0C) = 0x03; // normal mode DLAB = 0
+    *(volatile uint32_t *)(UART0_LCR) = 0x03; // normal mode DLAB = 0
     
 }
 
+// LSR: Line Status Register    THR(Transmit Holding Register)  RHR(Receive Holding Register)
+
 void uart_read(char *buf, int len){
     // refer Table 4-239 
-    // LSR: Line Status Register    THR(Transmit Holding Register)  RHR(Receive Holding Register)
-    
-    // above line is incomplete.
+    // LSR bit 0 (DR - Data Ready)
+    // In non-FIFO mode:
+    // 0 Data is not ready, or the DR bit was cleared because the character was read from the receiver buffer register (RBR).
+    // 1 Data is ready. A complete incoming character has been received and transferred into the receiver buffer register (RBR).
+
+    char data;
+    data = *(volatile uint8_t *)(UART0_RHR);
+    while (data != '\n')
+    if (*(volatile uint32_t *)(UART0_LSR) & 0x01){
+        
+
+    }
+
+
 }
 
 void uart_write(char *str){
@@ -81,11 +96,25 @@ void uart_write(char *str){
     // 0000 0001 <- shift left 5 times
     // 0010 0000 = 0x20
     // LSR & 0x20 (AND)
-    if (*(volatile uint32_t *)(UART0_BASE + 0x14) & 0x20) { 
-        // write to THR
-        *(volatile uint32_t *)(UART0_BASE + 0x00) = *str; // write the character to THR
-        
+    while(*str != '\0'){
+        if (*(volatile uint32_t *)(UART0_LSR) & 0x20) { 
+            // write to THR
+            *(volatile uint8_t *)(UART0_THR) = *str; // write the character to THR
+            // eventhough the register is 32 bit it only uses 8 bit
+            str++; // move to next character (infact next memory address)
+        }
+        /*
+        In non-FIFO mode:
+        0 Either the transmitter holding register (THR) or the transmitter shift register (TSR) contains a data character.
+        1 Both the transmitter holding register (THR) and the transmitter shift register (TSR) are empty
+        */
+
+        // *(volatile uint32_t *)(UART0_BASE + 0x14) & 0x40) this is the logic
+        // bit 6 is the TEMT
+        // TEMT = 1 means no more characters
+        // but we dont need to check that
     }
+    
 
 }
  
