@@ -39,7 +39,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define UART0_LCR (UART0_BASE + 0x0C)
 #define UART0_LSR (UART0_BASE + 0x14)
 
-void uart_init(){
+void uart_init(){ // call this once only
     // need to use volatile. So, the compiler always reads/writes to the memory address, instead of optimizing it away.
     // *(volatile uint32_t *) this part type casts and also defrerences the pointer to the memory address. So, we can read/write to the memory address directly.
     // Above process can b0e done in one line or separately. 
@@ -65,25 +65,40 @@ void uart_init(){
 
 // LSR: Line Status Register    THR(Transmit Holding Register)  RHR(Receive Holding Register)
 
-void uart_read(char *buf, int len){
+void uart_read(char *buf, int len){ // this is for terminal inputs
     // refer Table 4-239 
     // LSR bit 0 (DR - Data Ready)
     // In non-FIFO mode:
     // 0 Data is not ready, or the DR bit was cleared because the character was read from the receiver buffer register (RBR).
     // 1 Data is ready. A complete incoming character has been received and transferred into the receiver buffer register (RBR).
 
-    char data;
-    data = *(volatile uint8_t *)(UART0_RHR);
-    while (data != '\n')
-    if (*(volatile uint32_t *)(UART0_LSR) & 0x01){
+    /*
+    do{
+        char data;
+        if (*(volatile uint32_t *)(UART0_LSR) & 0x01){
+            
+            data = *(volatile uint8_t *)(UART0_RHR);
+        }
+
+    }
         
+    while(data != '\n');
+    */
+    
+    char data = '0';
+
+    while(data != '\n'){
+
+        if (*(volatile uint32_t *)(UART0_LSR) & 0x01){
+            
+            data = *(volatile uint8_t *)(UART0_RHR);
+        }
 
     }
 
-
 }
 
-void uart_write(char *str){
+void uart_write(char *str){ // can print predefined message on the terminal
     // refer Table 4-239
     /*
     Check the LSR bit 5
@@ -123,4 +138,5 @@ void mprintf(const char *str){
     // With my current implementation, we can only print string.
     // check the LSR bit 5 to see if THR is empty. If it is empty then write the character to THR. 
 
+    uart_write(str);
 }
