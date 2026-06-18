@@ -59,7 +59,7 @@ To check these we do bit masking
 
 ~~~
 LSR & (1<<5) 
-0000 0001 -> shift left 5 times
+0000 0001 <- shift left 5 times
 0010 0000 = 0x20
 LSR & 0x20 (AND)
 1 & 1 = 1 if not 0
