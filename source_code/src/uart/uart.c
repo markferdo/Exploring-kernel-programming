@@ -98,7 +98,7 @@ void uart_read(char *buf, int len){ // this is for terminal inputs
 
 }
 
-void uart_write(char *str){ // can print predefined message on the terminal
+void uart_write(const char *str){ // can print predefined message on the terminal
     // refer Table 4-239
     /*
     Check the LSR bit 5

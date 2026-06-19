@@ -6,9 +6,11 @@ include "<stddef.h>"
 
 */
 
-int kmain(){
+void kmain(void){
     uart_init();
     
     char str[] = "Hello I'm Mark Fernando. Welcome to my kernel!";
     mprintf(str);
+
+    while(1);
 }

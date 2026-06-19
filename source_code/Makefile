@@ -1,12 +1,11 @@
-build:
-	arm-none-eabi-as start.S -o start.o
-	arm-none-eabi-ld start.o -o kernel.elf
+CC = arm-none-eabi-gcc
+CFLAGS = -c -nostdlib -ffreestanding
 
-run:
-	qemu-system-arm \
-		-M versatilepb \
-		-cpu cortex-a8 \
-		-nographic \
-		-kernel kernel.elf
+build:
+	$(CC) $(CFLAGS) main.c -o main.o
+	$(CC) $(CFLAGS) src/uart/uart.c -o uart.o
+	arm-none-eabi-as start.S -o start.o
+	arm-none-eabi-ld -T linker.ld start.o main.o uart.o -o kernel.elf
+
 clean:
 	rm -f *.o *.elf
