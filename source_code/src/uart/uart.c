@@ -31,7 +31,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "uart.h"
 
 // Refer UART registers chapter 19.5
-#define UART0_BASE 0x44E090000
+#define UART0_BASE 0x44E09000
 #define UART0_THR (UART0_BASE + 0x00)
 #define UART0_RHR (UART0_BASE + 0x00) // RHR/RBR
 #define UART0_DLL (UART0_BASE + 0x00) // when DLAB=1
