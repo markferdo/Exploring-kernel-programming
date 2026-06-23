@@ -1,14 +1,3 @@
-26.1.6 Booting --> 2
-
-26.1.5 Start-up and Configuration --> 1
-
-AND MOST IMPORTANT:
-
-26.1.8 Memory Booting --> 3
-26.1.9 Peripheral Booting --> 4
-26.1.10 Image Format --> 5
-
-
 ## Start-up and Configuration (26.1.5)
 
 On this device the main MPU subsystem always starts its execution in secure mode after reset due to the
@@ -16,28 +5,6 @@ TrustZone architecture (the Secure ROM Code implements the reset handler). The P
 ROM Code. (Copied from 26.1.5.1)
 
 According to above statement when the chip powers on, the CPU starts the secure mode (ROM) and once it done it hand over to public ROM.
-
-
-~~~
-RESET
-  ↓
-Secure ROM (TrustZone reset handler)
-  ↓
-Public ROM (boot code @ 0x20000)
-  ↓
-DPLL / clock setup (basic)
-  ↓
-Boot mode selection (SYSBOOT pins)
-  ↓
-Load boot image (SD / eMMC / UART)
-  ↓
-Jump to loaded image (U-Boot or SPL)
-  ↓
-YOUR CODE ENTRY POINT (_start in assembly)
-  ↓
-C main()
-~~~
-
 
 
 ## Processor details
@@ -51,7 +18,6 @@ R0–R12  -> general purpose (variables, calculations, functions)
 R13     -> Stack Pointer (SP)
 R14     -> Link Register (LR) : stores return address
 R15     -> Program Counter (PC) : current execution address
-CPSR    -> status + mode control
 ~~~
 
 ### Linker
@@ -62,6 +28,32 @@ CPSR    -> status + mode control
 
 .bss for zero-initialized globals
 
+After the make, compiler creates the kernel.elf and convert this to kernel.bin need to run following command.
+
+~~~
+arm-none-eabi-objcopy -O binary kernel.elf kernel.bin
+~~~
+
+Then copy to sd card and unmount it.
+
+~~~
+cp kernel.bin /path of the sd card
+umount /path of the sd card
+~~~
+
+
+### loading to baglebone
+
+~~~
+-> load mmc 0:1 0x80000000 kernel.bin
+-> go 0x80000000
+~~~
+
+0x80000000 is where RAM starts. So, first command loads the kernel.bin file and go starts execute the ARM instruction.
+
+![loading the kernel](images/1.png)
+
+After the greeting message it rest back to onboard linux since the text was the only output.
 
 ### Links
 
