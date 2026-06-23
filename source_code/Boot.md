@@ -61,6 +61,10 @@ processor details: https://developer.arm.com/documentation/ddi0344/k/
 
 Linker script: https://developer.arm.com/documentation/107976/22-1-0/Map-code-and-data-to-your-target-device/Linker-scripts/Writing-linker-scripts
 
+Cortex-A8 Technical Reference Manual: https://developer.arm.com/documentation/ddi0344/k/
+
+BeagleBone Black Manual: https://docs.beagleboard.org/beaglebone-black.pdf
+
 https://wiki.osdev.org/Linker_Scripts
 
 https://www.eecs.umich.edu/courses/eecs373/readings/Linker.pdf

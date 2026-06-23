@@ -1,0 +1,7 @@
+.vscode/
+source_code/asm.txt
+source_code/kernel.bin
+source_code/kernel.elf
+source_code/main.o
+source_code/start.o
+source_code/uart.o
